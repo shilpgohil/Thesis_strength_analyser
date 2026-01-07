@@ -27,11 +27,17 @@ RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/wh
 # Install other dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Download the specific spacy model explicitly
-RUN python -m spacy download en_core_web_sm
+# Download spaCy model as a pip package (more reliable than spacy download command)
+RUN pip install --no-cache-dir https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
+
+# Link the model (ensures spacy.load("en_core_web_sm") works)
+RUN python -m spacy link en_core_web_sm en_core_web_sm
+
+# Verify spaCy model is installed correctly
+RUN python -c "import spacy; nlp = spacy.load('en_core_web_sm'); print('spaCy model verified!')"
 
 # Pre-download SentenceTransformer model to the explicit cache directory
-RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2'); print('SentenceTransformer model verified!')"
 
 # Copy the application code
 COPY . .
