@@ -1,8 +1,9 @@
 import axios from 'axios';
 
-// Hardcoded for production stability
-const API_BASE = 'https://thesis-strength-analyser.onrender.com/api';
-// const API_BASE = 'http://localhost:8000/api'; // Uncomment for local dev
+// Auto-detect environment based on browser URL
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:8000/api'
+    : 'https://thesis-strength-analyser.onrender.com/api';
 
 export const analyzeThesis = async (thesisText) => {
     // Backend expects a file upload (UploadFile), so we convert text to a Blob
