@@ -22,6 +22,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Download the specific spacy model explicitly setup to avoid runtime downloads
 RUN python -m spacy download en_core_web_sm
 
+# Pre-download SentenceTransformer model to avoid runtime timeout
+COPY preload_models.py .
+RUN python preload_models.py && rm preload_models.py
+
 # Copy the application code
 COPY . .
 

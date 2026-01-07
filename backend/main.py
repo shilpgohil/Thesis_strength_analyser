@@ -6,6 +6,7 @@ Provides REST API for thesis analysis.
 import os
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 from typing import Optional
 
@@ -31,14 +32,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS configuration for React frontend
+# CORS configuration for React frontend (local dev + Vercel production)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173", 
-        "http://localhost:3000"
+        "http://localhost:3000",
+        "http://127.0.0.1:5173"
     ],
-    # Robust Regex for ANY Vercel deployment (preview or production)
+    # Also allow any Vercel deployment (preview or production)
     allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
@@ -89,10 +91,12 @@ async def analyze_thesis(file: UploadFile = File(...)):
             )
         
         analyzer = StrengthAnalyzer(verbose=True)
-        result = await analyzer.analyze(text)
+        # Offload synchronous ML task to threadpool to avoid blocking
+        result = await run_in_threadpool(analyzer.analyze, text)
         
         logger.info("Analysis completed successfully")
-        return result
+        # Serialize the dataclass to dict for response validation
+        return result.to_dict()
     except Exception as e:
         logger.error(f"Analysis failed: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
