@@ -36,9 +36,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173", 
-        "http://localhost:3000", 
-        "https://thesis-strength-analyser-5jby.vercel.app"
+        "http://localhost:3000"
     ],
+    # Robust Regex for ANY Vercel deployment (preview or production)
     allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
