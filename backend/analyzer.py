@@ -10,6 +10,7 @@ This module analyzes investment theses using:
 import os
 import re
 import json
+import logging
 from typing import List, Dict, Tuple, Optional
 from dotenv import load_dotenv
 
