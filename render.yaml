@@ -1,0 +1,14 @@
+# render.yaml - Configuration for Render deployment
+# This file tells Render to use Docker for the backend service
+
+services:
+  - type: web
+    name: thesis-strength-analyser
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false  # Set manually in Render dashboard
