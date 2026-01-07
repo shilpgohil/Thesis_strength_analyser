@@ -4,10 +4,18 @@ FROM python:3.10-slim
 # Set working directory
 WORKDIR /app
 
+# Set cache directories to persist in the Docker image
+ENV TRANSFORMERS_CACHE=/app/.cache/huggingface
+ENV HF_HOME=/app/.cache/huggingface
+ENV SENTENCE_TRANSFORMERS_HOME=/app/.cache/sentence_transformers
+
 # Install system dependencies required for compilation
 RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
+
+# Create cache directories
+RUN mkdir -p /app/.cache/huggingface /app/.cache/sentence_transformers
 
 # Copy requirements file
 COPY requirements.txt .
@@ -19,12 +27,11 @@ RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/wh
 # Install other dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Download the specific spacy model explicitly setup to avoid runtime downloads
+# Download the specific spacy model explicitly
 RUN python -m spacy download en_core_web_sm
 
-# Pre-download SentenceTransformer model to avoid runtime timeout
-COPY preload_models.py .
-RUN python preload_models.py && rm preload_models.py
+# Pre-download SentenceTransformer model to the explicit cache directory
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
 
 # Copy the application code
 COPY . .

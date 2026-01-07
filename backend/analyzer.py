@@ -29,14 +29,15 @@ def get_spacy():
         import spacy
         try:
             _spacy_nlp = spacy.load("en_core_web_sm")
-        except OSError:
             if _verbose:
-                print("Downloading spaCy model...")
-            import subprocess
-            subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"], check=True)
-            _spacy_nlp = spacy.load("en_core_web_sm")
-        if _verbose:
-            print("spaCy model loaded.")
+                print("spaCy model loaded.")
+        except OSError as e:
+            # In production (Docker), model should be pre-downloaded
+            # Don't attempt runtime download - fail fast instead
+            raise RuntimeError(
+                "spaCy model 'en_core_web_sm' not found. "
+                "Ensure it was downloaded during Docker build."
+            ) from e
     return _spacy_nlp
 
 def get_openai_client():
