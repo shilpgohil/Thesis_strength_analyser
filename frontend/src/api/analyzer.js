@@ -5,8 +5,15 @@ const API_BASE = 'https://thesis-strength-analyser.onrender.com/api';
 // const API_BASE = 'http://localhost:8000/api'; // Uncomment for local dev
 
 export const analyzeThesis = async (thesisText) => {
-    const response = await axios.post(`${API_BASE}/analyze`, {
-        thesis_text: thesisText
+    // Backend expects a file upload (UploadFile), so we convert text to a Blob
+    const formData = new FormData();
+    const blob = new Blob([thesisText], { type: 'text/plain' });
+    formData.append('file', blob, 'thesis.txt');
+
+    const response = await axios.post(`${API_BASE}/analyze`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
     });
     return response.data;
 };
