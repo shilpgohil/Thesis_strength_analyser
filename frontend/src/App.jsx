@@ -21,7 +21,23 @@ function App() {
             setView('dashboard');
         } catch (err) {
             console.error('Analysis failed:', err);
-            setError(err.response?.data?.detail || 'Analysis failed. Please try again.');
+
+            let errorMessage = 'Analysis failed. Please try again.';
+            if (err.response?.data?.detail) {
+                const detail = err.response.data.detail;
+                if (typeof detail === 'string') {
+                    errorMessage = detail;
+                } else if (Array.isArray(detail)) {
+                    // Handle FastAPI validation errors (array of objects)
+                    errorMessage = detail.map(e => e.msg).join(', ');
+                } else if (typeof detail === 'object') {
+                    errorMessage = JSON.stringify(detail);
+                }
+            } else if (err.message) {
+                errorMessage = err.message;
+            }
+
+            setError(errorMessage);
             setView('upload');
         }
     };
